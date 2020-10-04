@@ -37,6 +37,15 @@ function getNftStats() {
                         image="https://dego.finance/upload/small/6.png";
 
                     }
+                    else if (d.name === 'Vitalik Buterin') {
+                        multiplier = 10000;
+                        image="https://dego.finance/upload/small/Vitalik_Buterin.png";
+
+                    } else if (d.name === 'Satoshi Nakamoto') {
+                        multiplier = 10000;
+                        image="https://dego.finance/upload/small/Satoshi.png";
+
+                    }
                     totalDegoAmount += Number(d.count) * multiplier;
                     stats.push({ name: d.name, count: d.count, percentage: (d.count / totalNFT * 100).toFixed(2), degoAmount:multiplier,value: totalDegoAmount,image:image })
                 }
@@ -69,7 +78,7 @@ $(document).ready(async function () {
             }
         }
     };
-    let htmlString =`<table class="table" id="dvlist" style="width:100%"> <thead class="thead-light">
+    let htmlString =`<div class="table-responsive"><table class="table" id="dvlist" style="width:100%"> <thead class="thead-light">
     <tr>
     <th >Image</th>
       <th >Name</th>
@@ -98,7 +107,7 @@ $(document).ready(async function () {
         totalValue +=d.value;
     }
     htmlString += '</tr>';
-    htmlString += `</tbody></table>`;
+    htmlString += `</tbody></table></div>`;
 
     let nftData = {
         labels: labels,
