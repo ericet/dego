@@ -57,6 +57,45 @@ function getNftStats() {
 
     });
 }
+function getContractABI(address) {
+    return new Promise((resolve, reject) => {
+        let url = "https://api.etherscan.io/api?module=contract&action=getabi&address=" + address;
+        axios.get(url).then(function (response) {
+            if (response.status == 200) {
+                resolve(JSON.parse(response.data.result));
+            }
+        });
+    });
+}
+
+function getRewardRate(myContract) {
+    return new Promise((resolve, reject) => {
+        myContract.methods._rewardRate().call(function (err, res) {
+            if (!err) {
+              resolve(res*24*60*60/1000000000000000000);
+            } else {
+                console.log(err);
+            }
+        }
+        );
+    });
+}
+
+function getTotalSupply(myContract) {
+    return new Promise((resolve, reject) => {
+        myContract.methods.totalSupply().call(function (err, res) {
+            if (!err) {
+              resolve(res/1000000000000000000);
+            } else {
+                console.log(err);
+            }
+        }
+        );
+    });
+}
+function getRewardPerPower(rewardRate, totalSupply){
+    return (rewardRate)*(1/(totalSupply));
+}
 
 $(document).ready(async function () {
     const colors = ['#007ED6', '#52D726', '#FFEC00', '#FF7300', '#7CDDDD', '#FF0000'];
@@ -145,7 +184,7 @@ $(document).ready(async function () {
           
               <div class="counter">
               <i class="fa fa-code fa-2x"></i>
-              <h2 class="timer count-title count-number" data-to="1700" data-speed="1500">${totalValue}/100000</h2>
+              <h2 class="timer count-title count-number" data-to="1700" data-speed="1500">${totalValue}</h2>
                   <p class="count-text">Total DEGO Amounts</p>
               </div>
           
@@ -155,4 +194,68 @@ $(document).ready(async function () {
   </div>
 </section>`;
     $('div#summary').html(summary);
+
+
+
+    const web3 = new Web3(new Web3.providers.HttpProvider("https://api.infura.io/v1/jsonrpc/mainnet"));
+    const pool1 = '0xbd277e47d0ECDd5db6c57Eda717dD8F5a329EDEC';
+    const pool2 = '0xa773C5a484789117d51019dB07307DAc326DE87c';
+    const pool3 = '0xB86021cbA87337dEa87bc055666146a263c9E0cd';
+    let abi = await getContractABI(pool1);
+    if (abi !== '') {
+        let pool1Contract = new web3.eth.Contract(abi, pool1);
+        let pool2Contract = new web3.eth.Contract(abi, pool2);
+        let pool3Contract = new web3.eth.Contract(abi, pool3);
+        let pool1RewardRate = await getRewardRate(pool1Contract);
+        let pool2RewardRate = await getRewardRate(pool2Contract);
+        let pool3RewardRate = await getRewardRate(pool3Contract);
+        let pool1TotalSupply = await getTotalSupply(pool1Contract);
+        let pool2TotalSupply = await getTotalSupply(pool2Contract);
+        let pool3TotalSupply = await getTotalSupply(pool3Contract);
+        let RewardPerPower1 =  getRewardPerPower(pool1RewardRate,pool1TotalSupply);
+        let RewardPerPower2 =  getRewardPerPower(pool2RewardRate,pool2TotalSupply);
+        let RewardPerPower3 =  getRewardPerPower(pool3RewardRate,pool3TotalSupply);
+
+        let pools =` <br/><div class="row">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card mb">
+                        <img class="card-img-top" src="./images/pool1.png">
+                        <div class="card-body mb">
+                            <h5 class="card-title">La Rinconada Pool</h5>
+                            <p class="card-text">Total Power: ${(pool1TotalSupply).toFixed(0)}</p>
+                            <p class="card-text">Reward Rate(1 Day): ${pool1RewardRate} DEGO</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower1.toFixed(2)} DEGO</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card mb">
+                        <img class="card-img-top" src="./images/pool2.png">
+                        <div class="card-body mb">
+                            <h5 class="card-title">Dharavi Pool</h5>
+                            <p class="card-text">Total Power: ${pool2TotalSupply.toFixed(0)}</p>
+                            <p class="card-text">Reward Rate(1 Day): ${pool2RewardRate} DEGO</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower2.toFixed(2)} DEGO</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card mb">
+                        <img class="card-img-top" src="./images/pool3.png">
+                        <div class="card-body mb">
+                            <h5 class="card-title">Krugersdrop Pool</h5>
+                            <p class="card-text">Total Power: ${pool3TotalSupply.toFixed(0)}</p>
+                            <p class="card-text">Reward Rate(1 Day): ${pool3RewardRate.toFixed(0)} DEGO</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower3.toFixed(2)} DEGO</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`
+    $('div#pools').html(pools);
+    }
+
 });
