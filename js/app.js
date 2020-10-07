@@ -256,7 +256,7 @@ $(document).ready(async function () {
         </div>
     </div>
     <br/>
-    <p><small>* Notes: 5% of the mining rewards will go to team and 10% of mining rewards will go to the reward pool</small></p>
+    <p><small>* Notes: 5% of the mining rewards will go to the team and 10% of mining rewards will go to the reward pool</small></p>
     `
     $('div#pools').html(pools);
     }
