@@ -12,42 +12,42 @@ function getNftStats() {
                 for (let d of data) {
                     let totalDegoAmount = 0;
                     let multiplier = 0;
-                    let image="";
+                    let image = "";
                     if (d.name === 'BRONZE') {
                         multiplier = 1;
-                        image="https://dego.finance/upload/small/1.png";
+                        image = "https://dego.finance/upload/small/1.png";
                     } else if (d.name === 'SILVER') {
                         multiplier = 2;
-                        image="https://dego.finance/upload/small/2.png";
+                        image = "https://dego.finance/upload/small/2.png";
 
                     } else if (d.name === 'GOLD') {
                         multiplier = 3;
-                        image="https://dego.finance/upload/small/3.png";
+                        image = "https://dego.finance/upload/small/3.png";
 
                     } else if (d.name === 'PLATINUM') {
                         multiplier = 4;
-                        image="https://dego.finance/upload/small/4.png";
+                        image = "https://dego.finance/upload/small/4.png";
 
                     } else if (d.name === 'DIAMOND') {
                         multiplier = 5;
-                        image="https://dego.finance/upload/small/5.png";
+                        image = "https://dego.finance/upload/small/5.png";
 
                     } else if (d.name === 'KRYPTONITE') {
                         multiplier = 100;
-                        image="https://dego.finance/upload/small/6.png";
+                        image = "https://dego.finance/upload/small/6.png";
 
                     }
                     else if (d.name === 'Vitalik Buterin') {
                         multiplier = 10000;
-                        image="https://dego.finance/upload/small/Vitalik_Buterin.png";
+                        image = "https://dego.finance/upload/small/Vitalik_Buterin.png";
 
                     } else if (d.name === 'Satoshi Nakamoto') {
                         multiplier = 10000;
-                        image="https://dego.finance/upload/small/Satoshi.png";
+                        image = "https://dego.finance/upload/small/Satoshi.png";
 
                     }
                     totalDegoAmount += Number(d.count) * multiplier;
-                    stats.push({ name: d.name, count: d.count, percentage: (d.count / totalNFT * 100).toFixed(2), degoAmount:multiplier,value: totalDegoAmount,image:image })
+                    stats.push({ name: d.name, count: d.count, percentage: (d.count / totalNFT * 100).toFixed(2), degoAmount: multiplier, value: totalDegoAmount, image: image })
                 }
                 resolve(stats);
 
@@ -72,7 +72,22 @@ function getRewardRate(myContract) {
     return new Promise((resolve, reject) => {
         myContract.methods._rewardRate().call(function (err, res) {
             if (!err) {
-              resolve(res*24*60*60/1000000000000000000);
+                resolve(res * 24 * 60 * 60 / 1000000000000000000);
+            } else {
+                console.log(err);
+            }
+        }
+        );
+    });
+}
+function getStakeInfo(myContract, gegoId) {
+    return new Promise((resolve, reject) => {
+        myContract.methods.getStakeInfo(gegoId).call(function (err, res) {
+            if (!err) {
+                if (Number(res.degoAmount) > 10000000000000000000000) {
+                    resolve(null);
+                }
+                resolve(res)
             } else {
                 console.log(err);
             }
@@ -85,7 +100,7 @@ function getTotalSupply(myContract) {
     return new Promise((resolve, reject) => {
         myContract.methods.totalSupply().call(function (err, res) {
             if (!err) {
-              resolve(res/1000000000000000000);
+                resolve(res / 1000000000000000000);
             } else {
                 console.log(err);
             }
@@ -93,8 +108,8 @@ function getTotalSupply(myContract) {
         );
     });
 }
-function getRewardPerPower(rewardRate, totalSupply){
-    return (rewardRate)*(1/(totalSupply));
+function getRewardPerPower(rewardRate, totalSupply) {
+    return (rewardRate) * (1 / (totalSupply));
 }
 
 $(document).ready(async function () {
@@ -117,7 +132,7 @@ $(document).ready(async function () {
             }
         }
     };
-    let htmlString =`<div class="table-responsive"><table class="table" id="dvlist" style="width:100%"> <thead class="thead-light">
+    let htmlString = `<div class="table-responsive"><table class="table" id="dvlist" style="width:100%"> <thead class="thead-light">
     <tr>
     <th >Image</th>
       <th >Name</th>
@@ -128,11 +143,11 @@ $(document).ready(async function () {
     let stats = await getNftStats();
     let labels = [];
     let data = [];
-    let totalCount=0;
-    let totalDegoAmount=0;
-    let totalValue=0;
+    let totalCount = 0;
+    let totalDegoAmount = 0;
+    let totalValue = 0;
     for (let d of stats) {
-        
+
         htmlString += `<td><img src="${d.image}" width="50" height="50"></span></td>`;
         htmlString += `<td><span>${d.name}</span></td>`;
         htmlString += `<td><span>${d.count}</span></td>`;
@@ -141,9 +156,9 @@ $(document).ready(async function () {
         htmlString += '</tr>';
         labels.push(d.name);
         data.push(d.count);
-        totalCount +=d.count;
-        totalDegoAmount +=d.degoAmount;
-        totalValue +=d.value;
+        totalCount += d.count;
+        totalDegoAmount += d.degoAmount;
+        totalValue += d.value;
     }
     htmlString += '</tr>';
     htmlString += `</tbody></table></div>`;
@@ -201,22 +216,23 @@ $(document).ready(async function () {
     const pool1 = '0xbd277e47d0ECDd5db6c57Eda717dD8F5a329EDEC';
     const pool2 = '0xa773C5a484789117d51019dB07307DAc326DE87c';
     const pool3 = '0xB86021cbA87337dEa87bc055666146a263c9E0cd';
+    let pool1Contract = null, pool2Contract = null, pool3Contract = null;
     let abi = await getContractABI(pool1);
     if (abi !== '') {
-        let pool1Contract = new web3.eth.Contract(abi, pool1);
-        let pool2Contract = new web3.eth.Contract(abi, pool2);
-        let pool3Contract = new web3.eth.Contract(abi, pool3);
+        pool1Contract = new web3.eth.Contract(abi, pool1);
+        pool2Contract = new web3.eth.Contract(abi, pool2);
+        pool3Contract = new web3.eth.Contract(abi, pool3);
         let pool1RewardRate = await getRewardRate(pool1Contract);
         let pool2RewardRate = await getRewardRate(pool2Contract);
         let pool3RewardRate = await getRewardRate(pool3Contract);
         let pool1TotalSupply = await getTotalSupply(pool1Contract);
         let pool2TotalSupply = await getTotalSupply(pool2Contract);
         let pool3TotalSupply = await getTotalSupply(pool3Contract);
-        let RewardPerPower1 =  getRewardPerPower(pool1RewardRate,pool1TotalSupply);
-        let RewardPerPower2 =  getRewardPerPower(pool2RewardRate,pool2TotalSupply);
-        let RewardPerPower3 =  getRewardPerPower(pool3RewardRate,pool3TotalSupply);
+        let RewardPerPower1 = getRewardPerPower(pool1RewardRate, pool1TotalSupply);
+        let RewardPerPower2 = getRewardPerPower(pool2RewardRate, pool2TotalSupply);
+        let RewardPerPower3 = getRewardPerPower(pool3RewardRate, pool3TotalSupply);
 
-        let pools =` <br/><div class="row">
+        let pools = ` <br/><div class="row">
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
@@ -227,6 +243,8 @@ $(document).ready(async function () {
                             <p class="card-text">Total Power: ${(pool1TotalSupply).toFixed(0)}</p>
                             <p class="card-text">Reward Rate(1 Day): ${pool1RewardRate} DEGO</p>
                             <p class="card-text">Reward/Power(1 Day): ${RewardPerPower1.toFixed(2)} DEGO</p>
+                            <div id="payout1"></div>
+
                         </div>
                     </div>
                 </div>
@@ -238,6 +256,8 @@ $(document).ready(async function () {
                             <p class="card-text">Total Power: ${pool2TotalSupply.toFixed(0)}</p>
                             <p class="card-text">Reward Rate(1 Day): ${pool2RewardRate} DEGO</p>
                             <p class="card-text">Reward/Power(1 Day): ${RewardPerPower2.toFixed(2)} DEGO</p>
+                            <div id="payout2"></div>
+
                         </div>
                     </div>
                 </div>
@@ -249,6 +269,7 @@ $(document).ready(async function () {
                             <p class="card-text">Total Power: ${pool3TotalSupply.toFixed(0)}</p>
                             <p class="card-text">Reward Rate(1 Day): ${pool3RewardRate.toFixed(0)} DEGO</p>
                             <p class="card-text">Reward/Power(1 Day): ${RewardPerPower3.toFixed(2)} DEGO</p>
+                            <div id="payout3"></div>
                         </div>
                     </div>
                 </div>
@@ -258,7 +279,28 @@ $(document).ready(async function () {
     <br/>
     <p><small>* Notes: 5% of the mining rewards will go to the team and 10% of mining rewards will go to the reward pool</small></p>
     `
-    $('div#pools').html(pools);
+        $('div#poolsDisplay').html(pools);
+        $('#calculate').submit(async function (e) {
+            e.preventDefault();
+            const gegoid = $('#gegoid').val().trim();
+            let stakeInfo = await getStakeInfo(pool1Contract, gegoid);
+            if (stakeInfo !== null) {
+                let stakeRate = Number(stakeInfo.stakeRate) / 100000;
+                let degoAmount = Number(stakeInfo.degoAmount) / 1000000000000000000;
+                let power = stakeRate * degoAmount;
+                let estimatedPayout1 = (power * RewardPerPower1 * 0.85).toFixed(2);
+                let estimatedPayout2 = (power * RewardPerPower2 * 0.85).toFixed(2);
+                let estimatedPayout3 = (power * RewardPerPower3 * 0.85).toFixed(2);
+                $('div#payout1').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout1} DEGO </p>`);
+                $('div#payout2').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout2} DEGO </p>`);
+                $('div#payout3').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout3} DEGO </p>`);
+            }else{
+               alert('GEGO ID not found')
+            }
+
+        });
     }
+
+
 
 });
