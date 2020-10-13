@@ -95,6 +95,18 @@ function getStakeInfo(myContract, gegoId) {
         );
     });
 }
+function getAddressStakeInfo(myContract, address) {
+    return new Promise((resolve, reject) => {
+        myContract.methods.balanceOf(address).call(function (err, res) {
+            if (!err) {
+                resolve(res)
+            } else {
+                console.log(err);
+            }
+        }
+        );
+    });
+}
 
 function getTotalSupply(myContract) {
     return new Promise((resolve, reject) => {
@@ -282,20 +294,47 @@ $(document).ready(async function () {
         $('div#poolsDisplay').html(pools);
         $('#calculate').submit(async function (e) {
             e.preventDefault();
-            const gegoid = $('#gegoid').val().trim();
-            let stakeInfo = await getStakeInfo(pool1Contract, gegoid);
-            if (stakeInfo !== null) {
-                let stakeRate = Number(stakeInfo.stakeRate) / 100000;
-                let degoAmount = Number(stakeInfo.degoAmount) / 1000000000000000000;
-                let power = stakeRate * degoAmount;
+            const input = $('#gegoid').val().trim();
+            let power=0;
+            if(input.startsWith('0x') && input.trim().length===42){
+                power = await getAddressStakeInfo(pool1Contract,input.trim());
+                if(power<=0){
+                    power = await getAddressStakeInfo(pool2Contract,input.trim());
+                    if(power<=0){
+                        power = await getAddressStakeInfo(pool3Contract,input.trim());
+                        if(power<=0){
+                            alert("No staked NFT found in your wallet");
+                            return;
+                        }else{
+                            power = (power/1000000000000000000).toFixed(2);
+                            
+                        }
+                    }
+                }
+            }
+            else if(input.startsWith("0x") && input.trim().length!==42){
+                alert("You entered incorrect ETH address");
+            }
+            else if(Number.isInteger(+input)){
+                let stakeInfo = await getStakeInfo(pool1Contract, input);
+                if(stakeInfo!=null){
+                    let stakeRate = Number(stakeInfo.stakeRate) / 100000;
+                    let degoAmount = Number(stakeInfo.degoAmount) / 1000000000000000000;
+                    power = stakeRate * degoAmount;
+                } else{
+                    alert('GEGO ID not found')
+                 }
+            }
+            else{
+                alert('GEGO ID not found')
+             }
+            if (power>0) {
                 let estimatedPayout1 = (power * RewardPerPower1 * 0.85).toFixed(2);
                 let estimatedPayout2 = (power * RewardPerPower2 * 0.85).toFixed(2);
                 let estimatedPayout3 = (power * RewardPerPower3 * 0.85).toFixed(2);
                 $('div#payout1').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout1} DEGO </p>`);
                 $('div#payout2').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout2} DEGO </p>`);
                 $('div#payout3').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout3} DEGO </p>`);
-            }else{
-               alert('GEGO ID not found')
             }
 
         });
