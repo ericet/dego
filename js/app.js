@@ -66,7 +66,16 @@ function getContractABI(address) {
         });
     });
 }
-
+function getBscContractABI(address) {
+    return new Promise((resolve, reject) => {
+        let url = "https://api.bscscan.com/api?module=contract&action=getabi&address=" + address;
+        axios.get(url).then(function (response) {
+            if (response.status == 200) {
+                resolve(JSON.parse(response.data.result));
+            }
+        });
+    });
+}
 function getRewardRate(myContract) {
     return new Promise((resolve, reject) => {
         myContract.methods._rewardRate().call(function (err, res) {
@@ -211,6 +220,118 @@ async function bscPage(){
   </div>
 </section>`;
     $('div#bscSummary').html(summary);
+}
+
+async function bscMiningPools(){
+    const web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org"));
+    const pool1 = '0x4cedaeaf3bc1139ad691d519895167cccc6bfc16';
+    const pool2 = '0x05b72c835c7619383d370b5e28c3aafb40270ab2';
+    const pool3 = '0x8b7dc6e5f3c0a7d8278c4900f548711bde365528';
+    let pool1Contract = null, pool2Contract = null, pool3Contract = null;
+    let abi = await getBscContractABI(pool1);
+    if (abi !== '') {
+        pool1Contract = new web3.eth.Contract(abi, pool1);
+        pool2Contract = new web3.eth.Contract(abi, pool2);
+        pool3Contract = new web3.eth.Contract(abi, pool3);
+        let pool1RewardRate = await getRewardRate(pool1Contract);
+        let pool2RewardRate = await getRewardRate(pool2Contract);
+        let pool3RewardRate = await getRewardRate(pool3Contract);
+        let pool1TotalSupply = await getTotalSupply(pool1Contract);
+        let pool2TotalSupply = await getTotalSupply(pool2Contract);
+        let pool3TotalSupply = await getTotalSupply(pool3Contract);
+        let RewardPerPower1 = getRewardPerPower(pool1RewardRate, pool1TotalSupply);
+        let RewardPerPower2 = getRewardPerPower(pool2RewardRate, pool2TotalSupply);
+        let RewardPerPower3 = getRewardPerPower(pool3RewardRate, pool3TotalSupply);
+
+        let pools = ` <br/><div class="row">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card mb">
+                        <img class="card-img-top" src="./images/pool1.png">
+                        <div class="card-body mb">
+                            <h5 class="card-title">La Rinconada Pool</h5>
+                            <p class="card-text">Total Power: ${(pool1TotalSupply).toFixed(0)}</p>
+                            <p class="card-text">Reward Rate(1 Day): ${pool1RewardRate} DEGO</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower1.toFixed(2)} DEGO</p>
+                            <div id="payout1"></div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card mb">
+                        <img class="card-img-top" src="./images/pool2.png">
+                        <div class="card-body mb">
+                            <h5 class="card-title">Dharavi Pool</h5>
+                            <p class="card-text">Total Power: ${pool2TotalSupply.toFixed(0)}</p>
+                            <p class="card-text">Reward Rate(1 Day): ${pool2RewardRate} DEGO</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower2.toFixed(2)} DEGO</p>
+                            <div id="payout2"></div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card mb">
+                        <img class="card-img-top" src="./images/pool3.png">
+                        <div class="card-body mb">
+                            <h5 class="card-title">Krugersdrop Pool</h5>
+                            <p class="card-text">Total Power: ${pool3TotalSupply.toFixed(0)}</p>
+                            <p class="card-text">Reward Rate(1 Day): ${pool3RewardRate.toFixed(0)} DEGO</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower3.toFixed(2)} DEGO</p>
+                            <div id="payout3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <p><small>* Notes: 5% of the mining rewards will go to the team and 10% of mining rewards will go to the reward pool</small></p>
+    `
+        $('div#bscPoolsDisplay').html(pools);
+        $('#bsc-calculate').submit(async function (e) {
+            e.preventDefault();
+            const input = $('#bscInput').val().trim();
+            let power = 0;
+            if (input.startsWith('0x') && input.trim().length === 42) {
+                let power1 = await getAddressStakeInfo(pool1Contract, input.trim());
+                let power2 = await getAddressStakeInfo(pool2Contract, input.trim());
+                let power3 = await getAddressStakeInfo(pool3Contract, input.trim());
+                power = ((Number(power1) + Number(power2) + Number(power3)) / 1000000000000000000).toFixed(2);
+                if (power == 0) {
+                    alert("No staked NFT found in your wallet");
+                    return;
+                }            
+            }
+            else if (input.startsWith("0x") && input.trim().length !== 42) {
+                alert("You entered incorrect BSC address");
+            }
+            else if (Number.isInteger(+input)) {
+                let stakeInfo = await getStakeInfo(pool1Contract, input);
+                if (stakeInfo != null) {
+                    let stakeRate = Number(stakeInfo.stakeRate) / 100000;
+                    let degoAmount = Number(stakeInfo.degoAmount) / 1000000000000000000;
+                    power = stakeRate * degoAmount;
+                } else {
+                    alert('GEGO ID not found')
+                }
+            }
+            else {
+                alert('GEGO ID not found')
+            }
+            if (power > 0) {
+                let estimatedPayout1 = (power * RewardPerPower1 * 0.85).toFixed(2);
+                let estimatedPayout2 = (power * RewardPerPower2 * 0.85).toFixed(2);
+                let estimatedPayout3 = (power * RewardPerPower3 * 0.85).toFixed(2);
+                $('div#payout1').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout1} DEGO </p>`);
+                $('div#payout2').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout2} DEGO </p>`);
+                $('div#payout3').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout3} DEGO </p>`);
+            }
+
+        });
+    }
 }
 
 bscPage()
@@ -396,20 +517,6 @@ $(document).ready(async function () {
                     alert("No staked NFT found in your wallet");
                     return;
                 }
-                console.log(power);
-                // if(power<=0){
-                //     power = await getAddressStakeInfo(pool2Contract,input.trim());
-                //     if(power<=0){
-                //         power = await getAddressStakeInfo(pool3Contract,input.trim());
-                //         if(power<=0){
-                //             alert("No staked NFT found in your wallet");
-                //             return;
-                //         }else{
-                //             power = (power/1000000000000000000).toFixed(2);
-
-                //         }
-                //     }
-                // }
             }
             else if (input.startsWith("0x") && input.trim().length !== 42) {
                 alert("You entered incorrect ETH address");
@@ -439,6 +546,6 @@ $(document).ready(async function () {
         });
     }
 
-
+    bscMiningPools()
 
 });

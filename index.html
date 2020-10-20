@@ -83,12 +83,16 @@
                     aria-selected="true">BSC Airdrops <i class="fas fa-plane-arrival"></i></a>
             </li>
             <li class="nav-item" role="presentation">
+                <a class="nav-link" id="bsc-pools-tab" data-toggle="tab" href="#bsc-pools" role="tab" aria-controls="bsc-pools"
+                    aria-selected="false">BSC Mining Pools <i class="fas fa-water"></i> </a>
+            </li>
+            <li class="nav-item" role="presentation">
                 <a class="nav-link" id="eth-tab" data-toggle="tab" href="#eth" role="tab" aria-controls="eth"
                     aria-selected="false">ETH Airdrops <i class="fas fa-plane-arrival"></i></a>
             </li>
             <li class="nav-item" role="presentation">
                 <a class="nav-link" id="pools-tab" data-toggle="tab" href="#pools" role="tab" aria-controls="pools"
-                    aria-selected="false">Mining Pools <i class="fas fa-water"></i> </a>
+                    aria-selected="false">ETH Mining Pools <i class="fas fa-water"></i> </a>
             </li>
             <li class="nav-item" role="presentation">
                 <a class="nav-link" id="donation-tab" data-toggle="tab" href="#donation" role="tab"
@@ -110,6 +114,35 @@
                     </div>
                 </div>
                 <div name='stats-bsc' id='stats-bsc'></div>
+            </div>
+            <div class="tab-pane fade" id="bsc-pools" role="tabpanel" aria-labelledby="bsc-pools-tab">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8">
+                        <form class="card card-sm" id="bsc-calculate">
+                            <div class="card-body row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <i class="fas fa-search h4 text-body"></i>
+                                </div>
+                                <!--end of col-->
+                                <div class="col">
+                                    <input class="form-control form-control-lg form-control-borderless" type="search"
+                                        placeholder="Enter your GEGO ID or BSC address" id="bscInput">
+                                </div>
+                                <!--end of col-->
+                                <div class="col-auto">
+                                    <button class="btn btn-lg btn-success" type="submit">Estimate Payout</button>
+                                </div>
+                                <!--end of col-->
+                            </div>
+                        </form>
+
+
+                    </div>
+                    <!--end of col-->
+                </div>
+                <div id="bscPoolsDisplay"></div>
+
+
             </div>
             <div class="tab-pane fade" id="eth" role="tabpanel" aria-labelledby="eth-tab">
                 <center>
