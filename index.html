@@ -94,6 +94,12 @@
                 <a class="nav-link" id="pools-tab" data-toggle="tab" href="#pools" role="tab" aria-controls="pools"
                     aria-selected="false">ETH Mining Pools <i class="fas fa-water"></i> </a>
             </li>
+
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="kcs-tab" data-toggle="tab" href="#kcs" role="tab" aria-controls="kcs"
+                    aria-selected="false">Kucoin Airdrops <i class="fas fa-water"></i> </a>
+            </li>
+
             <li class="nav-item" role="presentation">
                 <a class="nav-link" id="donation-tab" data-toggle="tab" href="#donation" role="tab"
                     aria-controls="donation" aria-selected="false">Donation <i class="fas fa-donate"></i>
@@ -188,6 +194,20 @@
                 <div id="poolsDisplay"></div>
 
 
+            </div>
+
+            <div class="tab-pane fade" id="kcs" role="tabpanel" aria-labelledby="kcs-tab">
+                <div name='kcs-summary' id='kcs-summary'></div>
+                <div class="row my-3">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <canvas id="kcs-nft"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div name='kcs-stats' id='kcs-stats'></div>
             </div>
             <div class="tab-pane fade" id="donation" role="tabpanel" aria-labelledby="donation-tab">
                 <h1>Donation</h1>
