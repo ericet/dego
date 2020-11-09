@@ -80,11 +80,15 @@
         <ul class=" nav nav-tabs justify-content-center" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
                 <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+                    aria-selected="true">Bounce BOT <i class="fas fa-plane-arrival"></i></a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="bsc-tab" data-toggle="tab" href="#bsc" role="tab" aria-controls="bsc"
                     aria-selected="true">BSC Airdrops <i class="fas fa-plane-arrival"></i></a>
             </li>
             <li class="nav-item" role="presentation">
-                <a class="nav-link" id="bsc-pools-tab" data-toggle="tab" href="#bsc-pools" role="tab" aria-controls="bsc-pools"
-                    aria-selected="false">BSC Mining Pools <i class="fas fa-water"></i> </a>
+                <a class="nav-link" id="bsc-pools-tab" data-toggle="tab" href="#bsc-pools" role="tab"
+                    aria-controls="bsc-pools" aria-selected="false">BSC Mining Pools <i class="fas fa-water"></i> </a>
             </li>
             <li class="nav-item" role="presentation">
                 <a class="nav-link" id="eth-tab" data-toggle="tab" href="#eth" role="tab" aria-controls="eth"
@@ -95,10 +99,10 @@
                     aria-selected="false">ETH Mining Pools <i class="fas fa-water"></i> </a>
             </li>
 
-            <li class="nav-item" role="presentation">
+            <!-- <li class="nav-item" role="presentation">
                 <a class="nav-link" id="kcs-tab" data-toggle="tab" href="#kcs" role="tab" aria-controls="kcs"
                     aria-selected="false">Kucoin Airdrops <i class="fas fa-water"></i> </a>
-            </li>
+            </li> -->
 
             <li class="nav-item" role="presentation">
                 <a class="nav-link" id="donation-tab" data-toggle="tab" href="#donation" role="tab"
@@ -109,6 +113,19 @@
         </ul>
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <div name='botSummary' id='botSummary'></div>
+                <div class="row my-3">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <canvas id="nft-bot"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div name='stats-bot' id='stats-bot'></div>
+            </div>
+            <div class="tab-pane fade show" id="bsc" role="tabpanel" aria-labelledby="bsc-tab">
                 <div name='bscSummary' id='bscSummary'></div>
                 <div class="row my-3">
                     <div class="col">
@@ -253,8 +270,15 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.7.3/dist/Chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-    <script src='js/app.js'></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86"
+        data-ad-client="ca-pub-3136148889231831" data-ad-slot="7893522061" data-adtest="on"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
 
+    <script src='js/app.js'></script>
+   
 </body>
 
 </html>

@@ -100,6 +100,51 @@ function getKcsNftStats(url) {
 
     });
 }
+
+function getBotNftStats(url) {
+    return new Promise((resolve, reject) => {
+        let stats = [];
+        axios.get(url).then(function (response) {
+            if (response.status == 200) {
+                let data = response.data;
+                let totalNFT = 0;
+                for (let d of data) {
+                    totalNFT += Number(d.count);
+                }
+                for (let d of data) {
+                    let totalDegoAmount = 0;
+                    let image = "";
+                    if (d.grade === 1) {
+                        image = "https://dego.finance/upload/small/BOT_1.png";
+                    } else if (d.grade ===2) {
+                        image = "https://dego.finance/upload/small/BOT_2.png";
+
+                    } else if (d.grade ===3) {
+                        image = "https://dego.finance/upload/small/BOT_3.png";
+
+                    } else if (d.grade ===4) {
+                        image = "https://dego.finance/upload/small/BOT_4.png";
+
+                    } else if (d.grade ===5) {
+                        image = "https://dego.finance/upload/small/BOT_5.png";
+
+                    } else if (d.grade ===6) {
+                        image = "https://dego.finance/upload/small/BOT_6.png";
+
+                    }
+                   
+                    totalDegoAmount += Number(d.count) * 29.4;
+                    stats.push({ name: d.name, count: d.count, percentage: (d.count / totalNFT * 100).toFixed(2), value: d.value,power:d.power,image: image })
+                }
+                resolve(stats);
+
+            }
+
+        });
+
+    });
+}
+
 function getContractABI(address) {
     return new Promise((resolve, reject) => {
         let url = "https://api.etherscan.io/api?module=contract&action=getabi&address=" + address;
@@ -365,6 +410,115 @@ async function kucoinPage(){
     $('div#kcs-summary').html(summary);
 }
 
+async function botPage(){
+    const colors = ['#007ED6', '#52D726', '#FFEC00', '#FF7300', '#7CDDDD', '#FF0000'];
+    const nftOptions = {
+        cutoutPercentage: 0,
+        legend: { position: 'bottom', padding: 5, labels: { pointStyle: 'circle', usePointStyle: true } },
+        plugins: {
+            datalabels: {
+                formatter: (value, ctx) => {
+                    let sum = 0;
+                    let dataArr = ctx.chart.data.datasets[0].data;
+                    dataArr.map(data => {
+                        sum += data;
+                    });
+                    let percentage = (value * 100 / sum).toFixed(2) + "%";
+                    return percentage;
+                },
+                color: '#fff',
+            }
+        }
+    };
+    let htmlString = `<div class="table-responsive"><table class="table" id="dvlist" style="width:100%"> <thead class="thead-light">
+    <tr>
+    <th >Image</th>
+      <th >Name</th>
+      <th >Count</th>
+      <th >Percentage</th>
+      <th >Total BOT Amount</th>
+      <th >Total Power</th>
+    </tr></thead><tbody>`;
+    let stats = await getBotNftStats('https://api.blurt.buzz/dego_nft_bot');
+    let labels = [];
+    let data = [];
+    let totalCount = 0;
+    let totalValue = 0;
+    let totalPower =0;
+    for (let d of stats) {
+        htmlString += `<td><img src="${d.image}" width="50" height="50"></span></td>`;
+        htmlString += `<td><span>${d.name}</span></td>`;
+        htmlString += `<td><span>${d.count}</span></td>`;
+        htmlString += `<td><span>${d.percentage}%</span></td>`;
+        htmlString += `<td><span>${d.value.toFixed(2)}</span></td>`;
+        htmlString += `<td><span>${d.power}</span></td>`;
+        htmlString += '</tr>';
+        labels.push(d.name);
+        data.push(d.count);
+        totalCount += d.count;
+        totalValue += d.value;
+        totalPower +=d.power;
+    }
+    htmlString += '</tr>';
+    htmlString += `</tbody></table></div>`;
+
+    let nftData = {
+        labels: labels,
+        datasets: [
+            {
+                backgroundColor: colors.slice(0, 6),
+                borderWidth: 0,
+                data: data
+            }
+        ]
+    };
+
+    var nft = document.getElementById("nft-bot");
+    if (nft) {
+        new Chart(nft, {
+            type: 'pie',
+            data: nftData,
+            options: nftOptions
+        });
+    }
+    $('div#stats-bot').html(htmlString);
+    let summary = `<section id="our-stats">
+  <div class="row text-center">
+      <div class="col">
+          
+              <div class="counter">
+              <i class="fas fa-robot fa-2x"></i>
+
+                  <h2 class="timer count-title count-number" data-to="100" data-speed="1500">${totalCount}</h2>
+                  <p class="count-text ">Total Number of NFTs</p>
+              </div>
+          
+      </div>
+      <div class="col">
+          
+              <div class="counter">
+              <i class="fa fa-code fa-2x"></i>
+              <h2 class="timer count-title count-number" data-to="1700" data-speed="1500">${totalValue.toFixed(2)}</h2>
+                  <p class="count-text">Total NFTs BOT Par Value</p>
+              </div>
+          
+      </div>
+      <div class="col">
+          
+      <div class="counter">
+      <i class="fab fa-superpowers fa-2x"></i>
+      <h2 class="timer count-title count-number" data-to="1700" data-speed="1500">${totalPower.toFixed(3)}</h2>
+          <p class="count-text">Total Power</p>
+      </div>
+  
+</div>
+    
+  
+  </div>
+</section>`;
+    $('div#botSummary').html(summary);
+}
+
 async function bscMiningPools(){
     const web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org"));
     const pool1 = '0x4cedaeaf3bc1139ad691d519895167cccc6bfc16';
@@ -479,7 +633,7 @@ async function bscMiningPools(){
 
 bscPage();
 kucoinPage();
-
+botPage();
 $(document).ready(async function () {
     const colors = ['#007ED6', '#52D726', '#FFEC00', '#FF7300', '#7CDDDD', '#FF0000'];
     const nftOptions = {
