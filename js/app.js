@@ -88,7 +88,7 @@ function getKcsNftStats(url) {
                         image = "https://dego.finance/upload/small/kucoin_6.png";
 
                     }
-                   
+
                     totalDegoAmount += Number(d.count) * 29.4;
                     stats.push({ name: d.name, count: d.count, percentage: (d.count / totalNFT * 100).toFixed(2), degoAmount: 29.4, value: totalDegoAmount, image: image })
                 }
@@ -116,25 +116,25 @@ function getBotNftStats(url) {
                     let image = "";
                     if (d.grade === 1) {
                         image = "https://dego.finance/upload/small/BOT_1.png";
-                    } else if (d.grade ===2) {
+                    } else if (d.grade === 2) {
                         image = "https://dego.finance/upload/small/BOT_2.png";
 
-                    } else if (d.grade ===3) {
+                    } else if (d.grade === 3) {
                         image = "https://dego.finance/upload/small/BOT_3.png";
 
-                    } else if (d.grade ===4) {
+                    } else if (d.grade === 4) {
                         image = "https://dego.finance/upload/small/BOT_4.png";
 
-                    } else if (d.grade ===5) {
+                    } else if (d.grade === 5) {
                         image = "https://dego.finance/upload/small/BOT_5.png";
 
-                    } else if (d.grade ===6) {
+                    } else if (d.grade === 6) {
                         image = "https://dego.finance/upload/small/BOT_6.png";
 
                     }
-                   
+
                     totalDegoAmount += Number(d.count) * 29.4;
-                    stats.push({ name: d.name, count: d.count, percentage: (d.count / totalNFT * 100).toFixed(2), value: d.value,power:d.power,image: image })
+                    stats.push({ name: d.name, count: d.count, percentage: (d.count / totalNFT * 100).toFixed(2), value: d.value, power: d.power, image: image })
                 }
                 resolve(stats);
 
@@ -222,7 +222,7 @@ function getRewardPerPower(rewardRate, totalSupply) {
 }
 
 
-async function bscPage(){
+async function bscPage() {
     const colors = ['#007ED6', '#52D726', '#FFEC00', '#FF7300', '#7CDDDD', '#FF0000'];
     const nftOptions = {
         cutoutPercentage: 0,
@@ -311,7 +311,7 @@ async function bscPage(){
     $('div#bscSummary').html(summary);
 }
 
-async function kucoinPage(){
+async function kucoinPage() {
     const colors = ['#007ED6', '#52D726', '#FFEC00', '#FF7300', '#7CDDDD', '#FF0000'];
     const nftOptions = {
         cutoutPercentage: 0,
@@ -410,7 +410,7 @@ async function kucoinPage(){
     $('div#kcs-summary').html(summary);
 }
 
-async function botPage(){
+async function botPage() {
     const colors = ['#007ED6', '#52D726', '#FFEC00', '#FF7300', '#7CDDDD', '#FF0000'];
     const nftOptions = {
         cutoutPercentage: 0,
@@ -444,7 +444,7 @@ async function botPage(){
     let data = [];
     let totalCount = 0;
     let totalValue = 0;
-    let totalPower =0;
+    let totalPower = 0;
     for (let d of stats) {
         htmlString += `<td><img src="${d.image}" width="50" height="50"></span></td>`;
         htmlString += `<td><span>${d.name}</span></td>`;
@@ -457,7 +457,7 @@ async function botPage(){
         data.push(d.count);
         totalCount += d.count;
         totalValue += d.value;
-        totalPower +=d.power;
+        totalPower += d.power;
     }
     htmlString += '</tr>';
     htmlString += `</tbody></table></div>`;
@@ -519,7 +519,7 @@ async function botPage(){
     $('div#botSummary').html(summary);
 }
 
-async function bscMiningPools(){
+async function bscMiningPools() {
     const web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org"));
     const pool1 = '0x4cedaeaf3bc1139ad691d519895167cccc6bfc16';
     const pool2 = '0x05b72c835c7619383d370b5e28c3aafb40270ab2';
@@ -600,7 +600,7 @@ async function bscMiningPools(){
                 if (power == 0) {
                     alert("No staked NFT found in your wallet");
                     return;
-                }            
+                }
             }
             else if (input.startsWith("0x") && input.trim().length !== 42) {
                 alert("You entered incorrect BSC address");
@@ -630,10 +630,42 @@ async function bscMiningPools(){
         });
     }
 }
+function getLatestBot() {
+    return new Promise((resolve, reject) => {
+        axios.get('https://api.blurt.buzz/dego_nft_bot_latest').then(function (response) {
+            if (response.status == 200) {
+                let data = response.data;
+                resolve(data);
+
+            }
+
+        });
+
+    });
+}
+async function latestBotPage() {
+    let latestBots = await getLatestBot();
+    let carouselItems = "";
+    for (let i = 0; i < latestBots.length; i++) {
+        let header = '';
+        if (i === 0) {
+            header = '<div class="carousel-item active">';
+        } else {
+            header = '<div class="carousel-item">';
+        }
+        carouselItems += `${header}
+        <a href="https://bscscan.com/token/0x36633b70eac3d1c98a20a6ecef6033d1077372f5?a=${latestBots[i].id}">
+        <span class="position-relative mx-2 badge badge-primary rounded-0">${latestBots[i].id}</span></a> <a class="text-white" href="https://bscscan.com/token/0x36633b70eac3d1c98a20a6ecef6033d1077372f5?a=${latestBots[i].id}">LV${latestBots[i].grade} | Quality: ${latestBots[i].quality} | Casting Par Value: ${latestBots[i].degoAmount} BOT | Power: ${latestBots[i].power}</a>
+    </div>`;
+
+    }
+    $('div#latestBot').html(carouselItems);
+}
 
 bscPage();
 kucoinPage();
 botPage();
+latestBotPage();
 $(document).ready(async function () {
     const colors = ['#007ED6', '#52D726', '#FFEC00', '#FF7300', '#7CDDDD', '#FF0000'];
     const nftOptions = {
