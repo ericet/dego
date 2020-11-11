@@ -195,7 +195,6 @@ function getStakeInfo(myContract, gegoId) {
 function getAddressStakeInfo(myContract, address) {
     return new Promise((resolve, reject) => {
         myContract.methods.balanceOf(address).call(function (err, res) {
-            console.log(err,res)
             if (!err) {
                 resolve(res)
             } else {
@@ -550,9 +549,9 @@ async function bscMiningPools() {
                         <div class="card-body mb">
                             <h5 class="card-title">La Rinconada Pool</h5>
                             <p class="card-text">Total Power: ${(pool1TotalSupply).toFixed(0)}</p>
-                            <p class="card-text">Reward Rate(1 Day): ${pool1RewardRate} DEGO</p>
-                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower1.toFixed(2)} DEGO</p>
-                            <div id="payout1"></div>
+                            <p class="card-text">Reward Rate(1 Day): ${pool1RewardRate.toFixed(5)} DEGO</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower1.toFixed(5)} DEGO</p>
+                            <div id="bsc-payout1"></div>
 
                         </div>
                     </div>
@@ -563,9 +562,9 @@ async function bscMiningPools() {
                         <div class="card-body mb">
                             <h5 class="card-title">Dharavi Pool</h5>
                             <p class="card-text">Total Power: ${pool2TotalSupply.toFixed(0)}</p>
-                            <p class="card-text">Reward Rate(1 Day): ${pool2RewardRate} DEGO</p>
-                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower2.toFixed(2)} DEGO</p>
-                            <div id="payout2"></div>
+                            <p class="card-text">Reward Rate(1 Day): ${pool2RewardRate.toFixed(5)} DEGO</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower2.toFixed(5)} DEGO</p>
+                            <div id="bsc-payout2"></div>
 
                         </div>
                     </div>
@@ -576,9 +575,9 @@ async function bscMiningPools() {
                         <div class="card-body mb">
                             <h5 class="card-title">Krugersdrop Pool</h5>
                             <p class="card-text">Total Power: ${pool3TotalSupply.toFixed(0)}</p>
-                            <p class="card-text">Reward Rate(1 Day): ${pool3RewardRate.toFixed(0)} DEGO</p>
-                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower3.toFixed(2)} DEGO</p>
-                            <div id="payout3"></div>
+                            <p class="card-text">Reward Rate(1 Day): ${pool3RewardRate.toFixed(5)} DEGO</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower3.toFixed(5)} DEGO</p>
+                            <div id="bsc-payout3"></div>
                         </div>
                     </div>
                 </div>
@@ -592,12 +591,16 @@ async function bscMiningPools() {
         $('#bsc-calculate').submit(async function (e) {
             e.preventDefault();
             const input = $('#bscInput').val().trim();
+            if(input===''){
+                alert("Please enter your GEGO ID or BSC address");
+                return;
+            }
             let power = 0;
             if (input.startsWith('0x') && input.trim().length === 42) {
                 let power1 = await getAddressStakeInfo(pool1Contract, input.trim());
                 let power2 = await getAddressStakeInfo(pool2Contract, input.trim());
                 let power3 = await getAddressStakeInfo(pool3Contract, input.trim());
-                power = ((Number(power1) + Number(power2) + Number(power3)) / 1000000000000000000).toFixed(2);
+                power = ((Number(power1) + Number(power2) + Number(power3)) / 1000000000000000000).toFixed(5);
                 if (power == 0) {
                     alert("No staked NFT found in your wallet");
                     return;
@@ -620,12 +623,12 @@ async function bscMiningPools() {
                 alert('GEGO ID not found')
             }
             if (power > 0) {
-                let estimatedPayout1 = (power * RewardPerPower1 * 0.85).toFixed(2);
-                let estimatedPayout2 = (power * RewardPerPower2 * 0.85).toFixed(2);
-                let estimatedPayout3 = (power * RewardPerPower3 * 0.85).toFixed(2);
-                $('div#payout1').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout1} DEGO </p>`);
-                $('div#payout2').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout2} DEGO </p>`);
-                $('div#payout3').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout3} DEGO </p>`);
+                let estimatedPayout1 = (power * RewardPerPower1 * 0.85).toFixed(5);
+                let estimatedPayout2 = (power * RewardPerPower2 * 0.85).toFixed(5);
+                let estimatedPayout3 = (power * RewardPerPower3 * 0.85).toFixed(5);
+                $('div#bsc-payout1').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout1} DEGO </p>`);
+                $('div#bsc-payout2').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout2} DEGO </p>`);
+                $('div#bsc-payout3').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout3} DEGO </p>`);
             }
 
         });
@@ -633,37 +636,56 @@ async function bscMiningPools() {
 }
 async function botMiningPools() {
     const web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org"));
-    const pool1 = '0xa8fa9c457eda354d14e389148452dba91d6945cc';
-    let pool1Contract = null;
+    const pool1 = '0x9ec557ad4f938f6027260a2c6d7f943ba7a90e76';
+    const pool2 = '0xa8fa9c457eda354d14e389148452dba91d6945cc';
+
+    let pool1Contract = null, pool2Contract = null;
     let abi = await getBscContractABI(pool1);
     if (abi !== '') {
         pool1Contract = new web3.eth.Contract(abi, pool1);
-       
+        pool2Contract = new web3.eth.Contract(abi, pool2);
+
         let pool1RewardRate = await getRewardRate(pool1Contract);
-       
+        let pool2RewardRate = await getRewardRate(pool2Contract);
+
         let pool1TotalSupply = await getTotalSupply(pool1Contract);
-      
+        let pool2TotalSupply = await getTotalSupply(pool2Contract);
+
         let RewardPerPower1 = getRewardPerPower(pool1RewardRate, pool1TotalSupply);
-      
-        let pools = ` <br/><div class="row">
+        let RewardPerPower2 = getRewardPerPower(pool2RewardRate, pool2TotalSupply);
+
+        let pools = ` <br/>
         <div class="container">
-            <div class="row">
-                <div class="col-md-4">
+        <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="card mb">
+                <img class="card-img-top" src="./images/GigaFactory1.png">
+                <div class="card-body mb">
+                    <h5 class="card-title">GigaFactory Nevada</h5>
+                    <p class="card-text">Total Power: ${(pool1TotalSupply).toFixed(0)}</p>
+                    <p class="card-text">Reward Rate(1 Day): ${pool1RewardRate.toFixed(5)} BOT</p>
+                    <p class="card-text">Reward/Power(1 Day): ${RewardPerPower1.toFixed(5)} BOT</p>
+                    <div id="bot-payout1"></div>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
                     <div class="card mb">
                         <img class="card-img-top" src="./images/GigaFactory2.png">
                         <div class="card-body mb">
                             <h5 class="card-title">GigaFactory Shanghai</h5>
-                            <p class="card-text">Total Power: ${(pool1TotalSupply).toFixed(3)}</p>
-                            <p class="card-text">Reward Rate(1 Day): ${pool1RewardRate.toFixed(3)} BOT</p>
-                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower1.toFixed(3)} BOT</p>
-                            <div id="payout1"></div>
+                            <p class="card-text">Total Power: ${(pool2TotalSupply).toFixed(0)}</p>
+                            <p class="card-text">Reward Rate(1 Day): ${pool2RewardRate.toFixed(5)} BOT</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower2.toFixed(5)} BOT</p>
+                            <div id="bot-payout2"></div>
 
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
     </div>
+           
+        </div>
     <br/>
     <p><small>* Notes: 5% of the mining rewards will go to the team and 10% of mining rewards will go to the reward pool</small></p>
     `
@@ -671,38 +693,64 @@ async function botMiningPools() {
         $('#bot-calculate').submit(async function (e) {
             e.preventDefault();
             const input = $('#botInput').val().trim();
-            console.log(input)
-            let power = 0;
+            if(input===''){
+                alert("Please enter your GEGO ID or BSC address");
+                return;
+            }
+            let power1 = 0;
+            let power2 = 0;
             if (input.startsWith('0x') && input.trim().length === 42) {
-                let power1 = await getAddressStakeInfo(pool1Contract, input.trim());
-                power = ((Number(power1)) / 1000000000000000000).toFixed(2);
-                if (power == 0) {
-                    alert("No staked NFT found in your wallet");
-                    return;
-                }
+                let holdingPower1 = await getAddressStakeInfo(pool1Contract, input.trim());
+                let holdingPower2 = await getAddressStakeInfo(pool2Contract, input.trim());
+                power1 = ((Number(holdingPower1)) / 1000000000000000000).toFixed(5);
+                power2 = ((Number(holdingPower2)) / 1000000000000000000).toFixed(5);
+                // if (power == 0) {
+                //     alert("No staked NFT found in your wallet");
+                //     return;
+                // }
             }
             else if (input.startsWith("0x") && input.trim().length !== 42) {
                 alert("You entered incorrect BSC address");
             }
             else if (Number.isInteger(+input)) {
-                let stakeInfo = await getStakeInfo(pool1Contract, input);
-                console.log(stakeInfo)
-                if (stakeInfo != null) {
-                    let stakeRate = Number(stakeInfo.stakeRate) / 100000;
-                    let degoAmount = Number(stakeInfo.amount) / 1000000000000000000;
-                    power = stakeRate * degoAmount;
-                } else {
-                    alert('GEGO ID not found')
+                let stakeInfo1 = await getStakeInfo(pool1Contract, input);
+                let stakeInfo2 = await getStakeInfo(pool2Contract, input);
+
+
+                if (stakeInfo1 != null) {
+                    let stakeRate = Number(stakeInfo1.stakeRate) / 100000;
+                    let degoAmount = Number(stakeInfo1.amount) / 1000000000000000000;
+                    if (degoAmount > 1000000) {
+                        power1 = 0;
+                    } else {
+                        power1 = stakeRate * degoAmount;
+                    }
                 }
+                if (stakeInfo2 != null) {
+                    let stakeRate = Number(stakeInfo2.stakeRate) / 100000;
+                    let degoAmount = Number(stakeInfo2.amount) / 1000000000000000000;
+                    if (degoAmount > 1000000) {
+                        power2 = 0;
+                    } else {
+                        power2 = stakeRate * degoAmount;
+                    }
+                }
+
             }
             else {
                 alert('GEGO ID not found')
             }
-            if (power > 0) {
-                let estimatedPayout1 = (power * RewardPerPower1 * 0.85).toFixed(2);
-               
-                $('div#payout1').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout1} BOT </p>`);
-               
+            if (power1 > 0) {
+                let estimatedPayout1 = (power1 * RewardPerPower1 * 0.85).toFixed(5);
+
+                $('div#bot-payout1').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout1} BOT </p>`);
+
+            }
+            if (power2 > 0) {
+                let estimatedPayout2 = (power2 * RewardPerPower2 * 0.85).toFixed(5);
+
+                $('div#bot-payout2').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout2} BOT </p>`);
+
             }
 
         });
@@ -873,8 +921,8 @@ $(document).ready(async function () {
                         <div class="card-body mb">
                             <h5 class="card-title">La Rinconada Pool</h5>
                             <p class="card-text">Total Power: ${(pool1TotalSupply).toFixed(0)}</p>
-                            <p class="card-text">Reward Rate(1 Day): ${pool1RewardRate} DEGO</p>
-                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower1.toFixed(2)} DEGO</p>
+                            <p class="card-text">Reward Rate(1 Day): ${pool1RewardRate.toFixed(5)} DEGO</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower1.toFixed(5)} DEGO</p>
                             <div id="payout1"></div>
 
                         </div>
@@ -886,8 +934,8 @@ $(document).ready(async function () {
                         <div class="card-body mb">
                             <h5 class="card-title">Dharavi Pool</h5>
                             <p class="card-text">Total Power: ${pool2TotalSupply.toFixed(0)}</p>
-                            <p class="card-text">Reward Rate(1 Day): ${pool2RewardRate} DEGO</p>
-                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower2.toFixed(2)} DEGO</p>
+                            <p class="card-text">Reward Rate(1 Day): ${pool2RewardRate.toFixed(5)} DEGO</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower2.toFixed(5)} DEGO</p>
                             <div id="payout2"></div>
 
                         </div>
@@ -899,8 +947,8 @@ $(document).ready(async function () {
                         <div class="card-body mb">
                             <h5 class="card-title">Krugersdrop Pool</h5>
                             <p class="card-text">Total Power: ${pool3TotalSupply.toFixed(0)}</p>
-                            <p class="card-text">Reward Rate(1 Day): ${pool3RewardRate.toFixed(0)} DEGO</p>
-                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower3.toFixed(2)} DEGO</p>
+                            <p class="card-text">Reward Rate(1 Day): ${pool3RewardRate.toFixed(5)} DEGO</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower3.toFixed(5)} DEGO</p>
                             <div id="payout3"></div>
                         </div>
                     </div>
@@ -915,12 +963,16 @@ $(document).ready(async function () {
         $('#calculate').submit(async function (e) {
             e.preventDefault();
             const input = $('#gegoid').val().trim();
+            if(input===''){
+                alert("Please enter your GEGO ID or ETH address");
+                return;
+            }
             let power = 0;
             if (input.startsWith('0x') && input.trim().length === 42) {
                 let power1 = await getAddressStakeInfo(pool1Contract, input.trim());
                 let power2 = await getAddressStakeInfo(pool2Contract, input.trim());
                 let power3 = await getAddressStakeInfo(pool3Contract, input.trim());
-                power = ((Number(power1) + Number(power2) + Number(power3)) / 1000000000000000000).toFixed(2);
+                power = ((Number(power1) + Number(power2) + Number(power3)) / 1000000000000000000).toFixed(5);
                 if (power == 0) {
                     alert("No staked NFT found in your wallet");
                     return;
