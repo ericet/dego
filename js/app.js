@@ -195,6 +195,7 @@ function getStakeInfo(myContract, gegoId) {
 function getAddressStakeInfo(myContract, address) {
     return new Promise((resolve, reject) => {
         myContract.methods.balanceOf(address).call(function (err, res) {
+            console.log(err,res)
             if (!err) {
                 resolve(res)
             } else {
@@ -630,6 +631,83 @@ async function bscMiningPools() {
         });
     }
 }
+async function botMiningPools() {
+    const web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org"));
+    const pool1 = '0xa8fa9c457eda354d14e389148452dba91d6945cc';
+    let pool1Contract = null;
+    let abi = await getBscContractABI(pool1);
+    if (abi !== '') {
+        pool1Contract = new web3.eth.Contract(abi, pool1);
+       
+        let pool1RewardRate = await getRewardRate(pool1Contract);
+       
+        let pool1TotalSupply = await getTotalSupply(pool1Contract);
+      
+        let RewardPerPower1 = getRewardPerPower(pool1RewardRate, pool1TotalSupply);
+      
+        let pools = ` <br/><div class="row">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card mb">
+                        <img class="card-img-top" src="./images/GigaFactory2.png">
+                        <div class="card-body mb">
+                            <h5 class="card-title">GigaFactory Shanghai</h5>
+                            <p class="card-text">Total Power: ${(pool1TotalSupply).toFixed(3)}</p>
+                            <p class="card-text">Reward Rate(1 Day): ${pool1RewardRate.toFixed(3)} BOT</p>
+                            <p class="card-text">Reward/Power(1 Day): ${RewardPerPower1.toFixed(3)} BOT</p>
+                            <div id="payout1"></div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <p><small>* Notes: 5% of the mining rewards will go to the team and 10% of mining rewards will go to the reward pool</small></p>
+    `
+        $('div#botPoolsDisplay').html(pools);
+        $('#bot-calculate').submit(async function (e) {
+            e.preventDefault();
+            const input = $('#botInput').val().trim();
+            console.log(input)
+            let power = 0;
+            if (input.startsWith('0x') && input.trim().length === 42) {
+                let power1 = await getAddressStakeInfo(pool1Contract, input.trim());
+                power = ((Number(power1)) / 1000000000000000000).toFixed(2);
+                if (power == 0) {
+                    alert("No staked NFT found in your wallet");
+                    return;
+                }
+            }
+            else if (input.startsWith("0x") && input.trim().length !== 42) {
+                alert("You entered incorrect BSC address");
+            }
+            else if (Number.isInteger(+input)) {
+                let stakeInfo = await getStakeInfo(pool1Contract, input);
+                console.log(stakeInfo)
+                if (stakeInfo != null) {
+                    let stakeRate = Number(stakeInfo.stakeRate) / 100000;
+                    let degoAmount = Number(stakeInfo.amount) / 1000000000000000000;
+                    power = stakeRate * degoAmount;
+                } else {
+                    alert('GEGO ID not found')
+                }
+            }
+            else {
+                alert('GEGO ID not found')
+            }
+            if (power > 0) {
+                let estimatedPayout1 = (power * RewardPerPower1 * 0.85).toFixed(2);
+               
+                $('div#payout1').html(`<p style="color:red"> Estimated Mining Payout(1 Day): ${estimatedPayout1} BOT </p>`);
+               
+            }
+
+        });
+    }
+}
 function getLatestBot() {
     return new Promise((resolve, reject) => {
         axios.get('https://api.blurt.buzz/dego_nft_bot_latest').then(function (response) {
@@ -877,5 +955,5 @@ $(document).ready(async function () {
     }
 
     bscMiningPools()
-
+    botMiningPools()
 });

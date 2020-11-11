@@ -104,6 +104,10 @@
                     aria-selected="true">Bounce BOT <i class="fas fa-plane-arrival"></i></a>
             </li>
             <li class="nav-item" role="presentation">
+                <a class="nav-link" id="bot-pools-tab" data-toggle="tab" href="#bot-pools" role="tab"
+                    aria-controls="bot-pools" aria-selected="false">BOT Mining Pools <i class="fas fa-water"></i> </a>
+            </li>
+            <li class="nav-item" role="presentation">
                 <a class="nav-link" id="bsc-tab" data-toggle="tab" href="#bsc" role="tab" aria-controls="bsc"
                     aria-selected="true">BSC Airdrops <i class="fas fa-plane-arrival"></i></a>
             </li>
@@ -203,6 +207,35 @@
                     </div>
                 </div>
                 <div name='stats-bsc' id='stats-bsc'></div>
+            </div>
+            <div class="tab-pane fade" id="bot-pools" role="tabpanel" aria-labelledby="bot-pools-tab">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8">
+                        <form class="card card-sm" id="bot-calculate">
+                            <div class="card-body row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <i class="fas fa-search h4 text-body"></i>
+                                </div>
+                                <!--end of col-->
+                                <div class="col">
+                                    <input class="form-control form-control-lg form-control-borderless" type="search"
+                                        placeholder="Enter your GEGO ID or BSC address" id="botInput">
+                                </div>
+                                <!--end of col-->
+                                <div class="col-auto">
+                                    <button class="btn btn-lg btn-success" type="submit">Estimate Payout</button>
+                                </div>
+                                <!--end of col-->
+                            </div>
+                        </form>
+
+
+                    </div>
+                    <!--end of col-->
+                </div>
+                <div id="botPoolsDisplay"></div>
+
+
             </div>
             <div class="tab-pane fade" id="bsc-pools" role="tabpanel" aria-labelledby="bsc-pools-tab">
                 <div class="row justify-content-center">
