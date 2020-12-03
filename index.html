@@ -101,24 +101,28 @@
         <ul class=" nav nav-tabs justify-content-center" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
                 <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
-                    aria-selected="true">Bounce BOT <i class="fas fa-plane-arrival"></i></a>
+                    aria-selected="true">Alpaca ALPA <i class="fas fa-plane-arrival"></i></a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="bot-tab" data-toggle="tab" href="#bot" role="tab" aria-controls="bot"
+                    >Bounce BOT <i class="fas fa-plane-arrival"></i></a>
             </li>
             <li class="nav-item" role="presentation">
                 <a class="nav-link" id="bot-pools-tab" data-toggle="tab" href="#bot-pools" role="tab"
                     aria-controls="bot-pools" aria-selected="false">BOT Mining Pools <i class="fas fa-water"></i> </a>
             </li>
-            <li class="nav-item" role="presentation">
+            <!-- <li class="nav-item" role="presentation">
                 <a class="nav-link" id="bsc-tab" data-toggle="tab" href="#bsc" role="tab" aria-controls="bsc"
                     aria-selected="true">BSC Airdrops <i class="fas fa-plane-arrival"></i></a>
-            </li>
+            </li> -->
             <li class="nav-item" role="presentation">
                 <a class="nav-link" id="bsc-pools-tab" data-toggle="tab" href="#bsc-pools" role="tab"
                     aria-controls="bsc-pools" aria-selected="false">BSC Mining Pools <i class="fas fa-water"></i> </a>
             </li>
-            <li class="nav-item" role="presentation">
+            <!-- <li class="nav-item" role="presentation">
                 <a class="nav-link" id="eth-tab" data-toggle="tab" href="#eth" role="tab" aria-controls="eth"
                     aria-selected="false">ETH Airdrops <i class="fas fa-plane-arrival"></i></a>
-            </li>
+            </li> -->
             <li class="nav-item" role="presentation">
                 <a class="nav-link" id="pools-tab" data-toggle="tab" href="#pools" role="tab" aria-controls="pools"
                     aria-selected="false">ETH Mining Pools <i class="fas fa-water"></i> </a>
@@ -138,6 +142,64 @@
         </ul>
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <br/>
+                <!--start code-->
+                <div class="row mb-5">
+                    <div class="col-12 py-4 bg-dark">
+                        <div class="row">
+                           
+                            <!--Breaking box-->
+                            <div class="col-md-3 col-lg-2 pr-md-0">
+                                <div class="p-2 bg-primary text-white text-center breaking-caret">
+                                    <span class="font-weight-bold">Last Casting NFT</span>
+                                </div>
+                            </div>
+                            <!--end breaking box-->
+                            <!--Breaking content-->
+                            <div class="col-md-9 col-lg-10 pl-md-4 py-2">
+                                <div class="breaking-box">
+                                    <div id="carouselbreaking" class="carousel slide" data-ride="carousel">
+                                        <div class="carousel-inner" id="latestAlpaca">
+                                        </div>
+                                        <!--end breaking news-->
+
+                                        <!--navigation slider-->
+                                        <div class="navigation-box p-2 d-none d-sm-block">
+                                            <!--nav left-->
+                                            <a class="carousel-control-prev text-primary" href="#carouselbreaking"
+                                                role="button" data-slide="prev">
+                                                <i class="fa fa-angle-left" aria-hidden="true"></i>
+                                                <span class="sr-only">Previous</span>
+                                            </a>
+                                            <!--nav right-->
+                                            <a class="carousel-control-next text-primary" href="#carouselbreaking"
+                                                role="button" data-slide="next">
+                                                <i class="fa fa-angle-right" aria-hidden="true"></i>
+                                                <span class="sr-only">Next</span>
+                                            </a>
+                                        </div>
+                                        <!--end navigation slider-->
+                                    </div>
+                                </div>
+                            </div>
+                            <!--end breaking content-->
+                        </div>
+                    </div>
+                </div>
+                <!--end code-->
+                <div name='alpacaSummary' id='alpacaSummary'></div>
+                <div class="row my-3">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <canvas id="nft-alpaca"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div name='stats-alpaca' id='stats-alpaca'></div>
+            </div>
+            <div class="tab-pane fade show" id="bot" role="tabpanel" aria-labelledby="bot-tab">
                 <br/>
                 <!--start code-->
                 <div class="row mb-5">

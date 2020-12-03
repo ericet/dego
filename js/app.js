@@ -101,6 +101,67 @@ function getKcsNftStats(url) {
     });
 }
 
+function getAlpacaNftStats(url) {
+    return new Promise((resolve, reject) => {
+        let stats = [];
+        axios.get(url).then(function (response) {
+            if (response.status == 200) {
+                let data = response.data;
+                let totalNFT = 0;
+                for (let d of data) {
+                    totalNFT += Number(d.count);
+                }
+                for (let d of data) {
+                    let image = "";
+                    let name = "";
+                    if (d.grade === 1) {
+                        image = "https://dego.finance/upload/small/alpaca_1.png";
+                    } else if (d.grade === 2) {
+                        image = "https://dego.finance/upload/small/alpaca_2.png";
+
+                    } else if (d.grade === 3) {
+                        image = "https://dego.finance/upload/small/alpaca_3.png";
+
+                    } else if (d.grade === 4) {
+                        image = "https://dego.finance/upload/small/alpaca_4.png";
+
+                    } else if (d.grade === 5) {
+                        image = "https://dego.finance/upload/small/alpaca_5.png";
+
+                    } else if (d.grade === 6) {
+                        image = "https://dego.finance/upload/small/alpaca_6.png";
+
+                    }
+                    if (d.name === 'nft_0076') {
+                        name = 'V1';
+                    } else if (d.name === 'nft_0077') {
+                        name = 'V2';
+
+                    } else if (d.name === 'nft_0078') {
+                        name = 'V3';
+
+                    } else if (d.name === 'nft_0079') {
+                        name = 'V4';
+
+                    } else if (d.name === 'nft_0080') {
+                        name = 'V5';
+
+                    } else if (d.name === 'nft_0081') {
+                        name = 'V6';
+
+                    }
+
+                    stats.push({ name, count: d.count, percentage: (d.count / totalNFT * 100).toFixed(2), value: d.value, power: d.power, image: image })
+                }
+                resolve(stats);
+
+            }
+
+        });
+
+    });
+}
+
 function getBotNftStats(url) {
     return new Promise((resolve, reject) => {
         let stats = [];
@@ -114,6 +175,7 @@ function getBotNftStats(url) {
                 for (let d of data) {
                     let totalDegoAmount = 0;
                     let image = "";
+                    let name="";
                     if (d.grade === 1) {
                         image = "https://dego.finance/upload/small/BOT_1.png";
                     } else if (d.grade === 2) {
@@ -133,8 +195,27 @@ function getBotNftStats(url) {
 
                     }
 
+                    if (d.name === 'nft_0015') {
+                        name = 'V1';
+                    } else if (d.name === 'nft_0017') {
+                        name = 'V2';
+
+                    } else if (d.name === 'nft_0018') {
+                        name = 'V3';
+
+                    } else if (d.name === 'nft_0019') {
+                        name = 'V4';
+
+                    } else if (d.name === 'nft_0020') {
+                        name = 'V5';
+
+                    } else if (d.name === 'nft_0021') {
+                        name = 'V6';
+
+                    }
+
                     totalDegoAmount += Number(d.count) * 29.4;
-                    stats.push({ name: d.name, count: d.count, percentage: (d.count / totalNFT * 100).toFixed(2), value: d.value, power: d.power, image: image })
+                    stats.push({ name, count: d.count, percentage: (d.count / totalNFT * 100).toFixed(2), value: d.value, power: d.power, image: image })
                 }
                 resolve(stats);
 
@@ -519,6 +600,116 @@ async function botPage() {
     $('div#botSummary').html(summary);
 }
 
+async function alpacaPage() {
+    const colors = ['#007ED6', '#52D726', '#FFEC00', '#FF7300', '#7CDDDD', '#FF0000'];
+    const nftOptions = {
+        cutoutPercentage: 0,
+        legend: { position: 'bottom', padding: 5, labels: { pointStyle: 'circle', usePointStyle: true } },
+        plugins: {
+            datalabels: {
+                formatter: (value, ctx) => {
+                    let sum = 0;
+                    let dataArr = ctx.chart.data.datasets[0].data;
+                    dataArr.map(data => {
+                        sum += data;
+                    });
+                    let percentage = (value * 100 / sum).toFixed(2) + "%";
+                    return percentage;
+                },
+                color: '#fff',
+            }
+        }
+    };
+    let htmlString = `<div class="table-responsive"><table class="table" id="dvlist" style="width:100%"> <thead class="thead-light">
+    <tr>
+    <th >Image</th>
+      <th >Name</th>
+      <th >Count</th>
+      <th >Percentage</th>
+      <th >Total ALPA Amount</th>
+      <th >Total Power</th>
+    </tr></thead><tbody>`;
+    let stats = await getAlpacaNftStats('https://api.blurt.buzz/dego_nft_alpaca');
+    let labels = [];
+    let data = [];
+    let totalCount = 0;
+    let totalValue = 0;
+    let totalPower = 0;
+    for (let d of stats) {
+        htmlString += `<td><img src="${d.image}" width="50" height="50"></span></td>`;
+        htmlString += `<td><span>${d.name}</span></td>`;
+        htmlString += `<td><span>${d.count}</span></td>`;
+        htmlString += `<td><span>${d.percentage}%</span></td>`;
+        htmlString += `<td><span>${d.value.toFixed(2)}</span></td>`;
+        htmlString += `<td><span>${d.power}</span></td>`;
+        htmlString += '</tr>';
+        labels.push(d.name);
+        data.push(d.count);
+        totalCount += d.count;
+        totalValue += d.value;
+        totalPower += d.power;
+    }
+    htmlString += '</tr>';
+    htmlString += `</tbody></table></div>`;
+
+    let nftData = {
+        labels: labels,
+        datasets: [
+            {
+                backgroundColor: colors.slice(0, 6),
+                borderWidth: 0,
+                data: data
+            }
+        ]
+    };
+
+    var nft = document.getElementById("nft-alpaca");
+    if (nft) {
+        new Chart(nft, {
+            type: 'pie',
+            data: nftData,
+            options: nftOptions
+        });
+    }
+    $('div#stats-alpaca').html(htmlString);
+    let summary = `<section id="our-stats">
+  <div class="row text-center">
+      <div class="col">
+          
+              <div class="counter">
+              <i class="fas fa-democrat fa-2x"></i>
+
+
+                  <h2 class="timer count-title count-number" data-to="100" data-speed="1500">${totalCount}</h2>
+                  <p class="count-text ">Total Number of NFTs</p>
+              </div>
+          
+      </div>
+      <div class="col">
+          
+              <div class="counter">
+              <i class="fa fa-code fa-2x"></i>
+              <h2 class="timer count-title count-number" data-to="1700" data-speed="1500">${totalValue.toFixed(2)}</h2>
+                  <p class="count-text">Total NFTs ALPA Par Value</p>
+              </div>
+          
+      </div>
+      <div class="col">
+          
+      <div class="counter">
+      <i class="fab fa-superpowers fa-2x"></i>
+      <h2 class="timer count-title count-number" data-to="1700" data-speed="1500">${totalPower.toFixed(3)}</h2>
+          <p class="count-text">Total Power</p>
+      </div>
+  
+</div>
+    
+  
+  </div>
+</section>`;
+    $('div#alpacaSummary').html(summary);
+}
+
 async function bscMiningPools() {
     const web3 = new Web3(new Web3.providers.HttpProvider("https://bsc-dataseed.binance.org"));
     const pool1 = '0x4cedaeaf3bc1139ad691d519895167cccc6bfc16';
@@ -591,7 +782,7 @@ async function bscMiningPools() {
         $('#bsc-calculate').submit(async function (e) {
             e.preventDefault();
             const input = $('#bscInput').val().trim();
-            if(input===''){
+            if (input === '') {
                 alert("Please enter your GEGO ID or BSC address");
                 return;
             }
@@ -693,7 +884,7 @@ async function botMiningPools() {
         $('#bot-calculate').submit(async function (e) {
             e.preventDefault();
             const input = $('#botInput').val().trim();
-            if(input===''){
+            if (input === '') {
                 alert("Please enter your GEGO ID or BSC address");
                 return;
             }
@@ -756,9 +947,9 @@ async function botMiningPools() {
         });
     }
 }
-function getLatestBot() {
+function getLatestCraft(url) {
     return new Promise((resolve, reject) => {
-        axios.get('https://api.blurt.buzz/dego_nft_bot_latest').then(function (response) {
+        axios.get(url).then(function (response) {
             if (response.status == 200) {
                 let data = response.data;
                 resolve(data);
@@ -769,8 +960,10 @@ function getLatestBot() {
 
     });
 }
+
+
 async function latestBotPage() {
-    let latestBots = await getLatestBot();
+    let latestBots = await getLatestCraft('https://api.blurt.buzz/dego_nft_bot_latest');
     let carouselItems = "";
     for (let i = 0; i < latestBots.length; i++) {
         let header = '';
@@ -788,10 +981,31 @@ async function latestBotPage() {
     $('div#latestBot').html(carouselItems);
 }
 
+async function latestAlpacaPage() {
+    let latestBots = await getLatestCraft('https://api.blurt.buzz/dego_nft_alpaca_latest');
+    let carouselItems = "";
+    for (let i = 0; i < latestBots.length; i++) {
+        let header = '';
+        if (i === 0) {
+            header = '<div class="carousel-item active">';
+        } else {
+            header = '<div class="carousel-item">';
+        }
+        carouselItems += `${header}
+        <a href="https://bscscan.com/token/0x36633b70eac3d1c98a20a6ecef6033d1077372f5?a=${latestBots[i].id}">
+        <span class="position-relative mx-2 badge badge-primary rounded-0">${latestBots[i].id}</span></a> <a class="text-white" href="https://bscscan.com/token/0x36633b70eac3d1c98a20a6ecef6033d1077372f5?a=${latestBots[i].id}">LV${latestBots[i].grade} | Quality: ${latestBots[i].quality} | Casting Par Value: ${latestBots[i].degoAmount} ALPA | Power: ${latestBots[i].power}</a>
+    </div>`;
+
+    }
+    $('div#latestAlpaca').html(carouselItems);
+}
+
 bscPage();
 kucoinPage();
 botPage();
 latestBotPage();
+alpacaPage();
+latestAlpacaPage();
 $(document).ready(async function () {
     const colors = ['#007ED6', '#52D726', '#FFEC00', '#FF7300', '#7CDDDD', '#FF0000'];
     const nftOptions = {
@@ -963,7 +1177,7 @@ $(document).ready(async function () {
         $('#calculate').submit(async function (e) {
             e.preventDefault();
             const input = $('#gegoid').val().trim();
-            if(input===''){
+            if (input === '') {
                 alert("Please enter your GEGO ID or ETH address");
                 return;
             }
